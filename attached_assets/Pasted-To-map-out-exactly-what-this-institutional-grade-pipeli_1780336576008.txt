@@ -1,0 +1,60 @@
+To map out exactly what this institutional-grade pipeline is capable of—and more importantly, where it breaks—you need a rigorous, multi-layered testing suite. Given the mathematical complexity of your engine (fractional differentiation, TVTP-HMM, Kalman-CUSUM, Wasserstein drift), basic unit tests aren't enough.
+You need a mix of **mathematical invariants, structural stress tests, and synthetic boundary evaluations**. Here is a detailed blueprint of the tests you should implement next.
+## 1. Mathematical & Structural Invariant Tests
+These tests ensure your custom implementations (like the TVTP-HMM and fractional differentiation) conform to mathematical laws. If these fail, your pipeline is leaking alpha through silent bugs.
+### TVTP-HMM Stochastic Matrix Invariant
+ * **Objective:** Ensure the Time-Varying Transition Probability matrix always sums to 1 for every single bar, regardless of how extreme the 18\beta parameter transitions become.
+ * **Implementation:** Generate a synthetic dataset of highly volatile, random 6D features. Pass them through Layer 4. Assert that for every time step t, the computed transition matrix P_t satisfies:
+   
+ * **Failure Condition:** Any absolute deviation greater than 10^{-7} (indicating a bug in your softmax/logistic formulation for the TVTP).
+### Fractional Differentiation Memory Retention Test
+ * **Objective:** Prove that Layer 1 is achieving stationarity *without* entirely destroying memory (autocorrelation).
+ * **Implementation:**
+   1. Run the ADF (Augmented Dickey-Fuller) test on the raw prices (should fail to reject the null hypothesis of a unit root).
+   2. Run the ADF test on the fractionally differentiated series at your optimal d^* (should reject the null hypothesis at p < 0.01).
+   3. Compute the mutual information or a long-lag autocorrelation between the raw series and the differentiated series. Assert it is greater than 0.20 at lag 20.
+ * **Failure Condition:** If d^* forces the series to look exactly like standard first-differencing (d=1), your memory retention mechanism is failing.
+## 2. Boundary & Synthetic Regime Stress Tests
+Since you noticed the HMM appropriately outputs ~33% probabilities on mixed 2022-2024 SPY data, you need to prove the model *can* confidently identify clear regimes when they exist.
+### Synthetic Pure-Regime Stress Test
+ * **Objective:** Verify Viterbi decoding and Baum-Welch convergence.
+ * **Implementation:** Generate three distinct, concatenated synthetic datasets using a Known Data Generating Process (DGP):
+   * **Regime 1 (Trending Bull):** High m_t (momentum), high H_t (Hurst ~0.75), low \sigma_t (volatility).
+   * **Regime 2 (Mean Reverting/Choppy):** Low m_t, low H_t (~0.35), high \rho_t (negative autocorrelation).
+   * **Regime 3 (Crisis/High Vol):** High \sigma_t, high q_t (variance/tail risk), vt near breakout zones.
+ * **Test:** Feed this concatenated series into the pipeline.
+ * **Metrics to verify:**
+   * Does the HMM decode states that match your synthetic boundaries with a Viterbi path accuracy of greater than 90%?
+   * Do the regime probabilities for the dominant state exceed 0.80 during the peak of those synthetic eras?
+### Kalman-CUSUM Jump Reset Test
+ * **Objective:** Verify that the Kalman filter correctly catches structural breaks and resets its diffuse prior, rather than lagging behind a sudden market gap.
+ * **Implementation:** Feed the pipeline a steady trending series, then introduce an artificial **10-sigma overnight gap/shock** in the data.
+ * **Metrics to verify:** Check that the CUSUM trigger fires (\kappa=0.5, h=5.0). Assert that the Kalman state covariance matrix P_t spikes immediately following the trigger (indicating the diffuse-prior reset), and that the tracking error drops back to near-zero within 3 bars of the shock.
+## 3. Execution & Surveillance Invalidation Tests
+These tests determine if your risk circuit breakers and execution filters are actually protecting your capital.
+### Triple-Gate Friction Sensitivity Test
+ * **Objective:** Test how the conservative P(\text{TREND}) > 0.65 threshold holds up under simulated execution friction.
+ * **Implementation:**
+   1. Extract all timestamps where a signal was generated.
+   2. Introduce a parameterized execution delay (e.g., execute the trade 1, 2, or 5 Dollar-Volume bars *after* the signal fires).
+   3. Apply your 4 scenario transaction cost matrices (Layer 6).
+ * **Metrics to verify:** Plot the decay curve of your Sharpe Ratio relative to execution latency. Determine the exact "half-life" of a signal. If the strategy goes net-negative with a 1-bar execution delay, the signals are too fragile for production.
+### Wasserstein Surveillance (Sinkhorn) Circuit Breaker Test
+ * **Objective:** Verify that Layer 5 successfully halts trading when the environment becomes alien to the training set.
+ * **Implementation:** Run your pipeline on training data from a quiet period (e.g., 2017). For the "live inference" phase, feed it data from a hyper-volatile, structurally distinct period (e.g., March 2020 COVID crash or late 2008).
+ * **Metrics to verify:**
+   * Assert that the Wasserstein distance W_1 breaches the 0.3\sigma_{\text{training}} threshold within the first few bars of the regime shift.
+   * Verify that the engine outputs a specific HALT_TRADING status code and scales positions down to 25% or 0% immediately.
+## 4. Statistical Overfitting Validation Tests
+To ensure your backtest isn't an artifact of data mining, you need to validate the L6 validation metrics.
+### Monte Carlo Permutation Test (Spurious Alpha Check)
+ * **Objective:** Prove your Deflated Sharpe Ratio (DSR) is meaningful by comparing it against pure noise.
+ * **Implementation:** Take your L2 feature tensor and *shuffle the rows* to destroy all temporal order and correlation structures. Run this scrambled tensor through Layers 3, 4, and 5.
+ * **Metrics to verify:** The calculated Sharpe Ratio from the scrambled data must yield a Probabilistic Sharpe Ratio (PSR) of less than 0.10. If the model manages to find a "profitable strategy" on scrambled data, your features or target labeling are suffering from data leakage.
+### Combinatorially Purged Cross-Validation (CPCV) Leakage Test
+ * **Objective:** Ensure that information from the training folds isn't bleeding into the testing folds through the overlapping windows of your rolling features (like the 504-bar Kalman window).
+ * **Implementation:** Calculate the performance metrics across all combinations of your train/test folds. Compare the average Sharpe Ratio of adjacent train/test combinations versus completely isolated combinations.
+ * **Metrics to verify:** The variation in Sharpe across folds should be uniformly distributed. If adjacent folds consistently show significantly higher performance, your purging window is too small and is leaking feature memory across the train/test divide.
+## Next Steps for Construction
+To make building this efficient, I recommend creating a single testing script: /engine/tests/run_validation_suite.py.
+Would you like me to write a clean, structured Python test framework using pytest and numpy/scipy to implement the **TVTP-HMM Stochastic Invariant Test** and the **Synthetic Pure-Regime Generator** first?

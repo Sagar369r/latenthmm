@@ -108,7 +108,9 @@ class WassersteinMonitor:
         clean = X_train[~np.any(np.isnan(X_train), axis=1)]
         self._train_X = clean
 
-        # Bootstrap estimate of W1 variability within training set
+        # Bootstrap estimate of W1 baseline within training set.
+        # We compare window×window sub-samples (same size as live check) so
+        # the calibration is apples-to-apples with the live comparison.
         if len(clean) >= 100:
             rng = np.random.default_rng(0)
             w1_samples = []
@@ -117,8 +119,13 @@ class WassersteinMonitor:
                 idx_b = rng.choice(len(clean), self.window, replace=False)
                 w1 = _wasserstein1_sinkhorn(clean[idx_a], clean[idx_b])
                 w1_samples.append(w1)
-            self._sigma_train = float(np.std(w1_samples)) if w1_samples else 1.0
-            self._threshold = self.threshold_multiplier * self._sigma_train
+            w1_mean = float(np.mean(w1_samples)) if w1_samples else 1.0
+            self._sigma_train = float(np.std(w1_samples))  if w1_samples else 1.0
+            # Threshold = baseline × (1 + multiplier).
+            # E.g., multiplier=0.3 → halt when live W1 exceeds 130% of the
+            # natural in-distribution W1 level.  This is robust against
+            # finite-sample W1 noise within the training distribution.
+            self._threshold = w1_mean * (1.0 + self.threshold_multiplier)
         else:
             self._sigma_train = 1.0
             self._threshold = 0.3
@@ -162,7 +169,24 @@ class WassersteinMonitor:
                 "status": "insufficient_data",
             }
 
-        w1 = _wasserstein1_sinkhorn(self._train_X, clean_live)
+        # Sub-sample training to exactly self.window rows so the comparison is
+        # apples-to-apples with the bootstrap calibration (which also uses
+        # window × window pairs).  Using the full training set would produce a
+        # systematically larger W1 than the bootstrapped threshold, causing
+        # false halts on in-distribution live data.
+        rng_check = np.random.default_rng(int(len(self._history)) % (2**31))
+        if len(self._train_X) > self.window:
+            idx_tr = rng_check.choice(len(self._train_X), self.window, replace=False)
+            train_sample = self._train_X[idx_tr]
+        else:
+            train_sample = self._train_X
+
+        # Also cap the live window at self.window for symmetry
+        if len(clean_live) > self.window:
+            idx_lv = rng_check.choice(len(clean_live), self.window, replace=False)
+            clean_live = clean_live[idx_lv]
+
+        w1 = _wasserstein1_sinkhorn(train_sample, clean_live)
         self._history.append(w1)
 
         halt = w1 > self._threshold
