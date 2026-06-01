@@ -1,0 +1,2 @@
+- [Python Engine in pnpm Monorepo](python-engine-in-monorepo.md) — Python FastAPI service lives in artifacts/python-engine/, routed via api-server artifact.toml as a second [[services]] block.
+- [TVTP-HMM custom implementation](tvtp-hmm-custom.md) — hmmlearn does not support TVTP; Baum-Welch + Viterbi implemented from scratch in engine/hmm.py.
