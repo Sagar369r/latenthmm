@@ -1,3 +1,5 @@
 - [Python Engine in pnpm Monorepo](python-engine-in-monorepo.md) — Python FastAPI service lives in artifacts/python-engine/, routed via api-server artifact.toml as a second [[services]] block.
 - [TVTP-HMM custom implementation](tvtp-hmm-custom.md) — hmmlearn does not support TVTP; Baum-Welch + Viterbi implemented from scratch in engine/hmm.py.
 - [TVTP-HMM mode collapse](hmm-collapse.md) — HMM collapses to single absorbing state on >~1000 real SPY bars; use 504-bar rolling walk-forward windows instead.
+- [Validation module API](validation-api.md) — walk_forward_cv/cpcv take simulate_fn callbacks, not returns arrays; mc takes (returns, simulate_fn); dsr/tx_cost take returns + metadata directly.
+- [EUR/USD forex tear sheet results](eurusd-tearsheet.md) — Walk-forward tear sheet verdict, key diagnostics, and what to fix for the next iteration.
