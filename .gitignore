@@ -47,3 +47,9 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+venv/
+.venv/
+__pycache__/
+.env
+.DS_Store\n.env\n*.env\nmodels/\n*.pth\n*.json\n__pycache__/\n*.pyc\n.pytest_cache/

@@ -46,7 +46,7 @@ rl_lr_actor: 0.0003
 rl_lr_critic: 0.001
 rl_entropy_coef: 0.01
 rl_drawdown_penalty: 5.0
-rl_slippage_penalty: 0.5
+rl_slippage_penalty: 3.0
 rl_context_buffer_size: 100000
 cpcv_n_splits: 6
 cpcv_n_test_splits: 2
