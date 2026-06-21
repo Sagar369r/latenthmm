@@ -1,0 +1,4 @@
+# Simulation specific overrides
+live_mc_throttle_sec: 0.0      # Run MC barrier check every tick in simulation
+sde_epochs: 1                  # Optional fast dry-runs for SDE if retrained in simulation
+live_min_buffer_ticks: 100     # Let it start quickly

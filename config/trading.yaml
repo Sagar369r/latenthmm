@@ -1,0 +1,94 @@
+symbol: EURUSD
+initial_equity: 2500.0
+symbols:
+- EURUSD
+- GBPUSD
+- USDJPY
+- US30
+- DE40
+primary_symbol: EURUSD
+pip_default:
+  size: 0.0001
+  value_per_lot: 10.0
+symbol_overrides:
+  USDJPY:
+    pip_size: 0.01
+    pip_value_per_lot: 9.0
+  USDCHF:
+    pip_size: 0.0001
+    pip_value_per_lot: 10.0
+  AUDUSD:
+    pip_size: 0.0001
+    pip_value_per_lot: 10.0
+  NZDUSD:
+    pip_size: 0.0001
+    pip_value_per_lot: 10.0
+  USDCAD:
+    pip_size: 0.0001
+    pip_value_per_lot: 10.0
+  EURGBP:
+    pip_size: 0.0001
+    pip_value_per_lot: 10.0
+  EURJPY:
+    pip_size: 0.01
+    pip_value_per_lot: 10.0
+  US30:
+    pip_size: 1.0
+    pip_value_per_lot: 1.0
+  DE40:
+    pip_size: 1.0
+    pip_value_per_lot: 1.0
+  US100:
+    pip_size: 1.0
+    pip_value_per_lot: 1.0
+  XAUUSD:
+    pip_size: 0.01
+    pip_value_per_lot: 0.1
+max_daily_drawdown_usd: 125.0
+max_daily_drawdown_pct: 0.05
+max_total_drawdown_pct: 0.1
+daily_profit_lock_pct: 0.02
+max_position_fraction: 0.01
+half_kelly_fraction: 0.25
+max_open_positions: 1
+atr_sl_mult: 2.0
+atr_tp_mult: 4.0
+slippage_pips: 1.5
+target_calmar_ratio: 4.5
+target_sharpe: 2.0
+target_win_rate: 0.48
+target_max_dd_usd: 125.0
+target_tick_latency_ms: 12
+prop_pass_probability: 0.7
+dukascopy_history_months: 24
+dukascopy_tick_url: https://datafeed.dukascopy.com/datafeed
+prop_profiles:
+  THE_5ERS_2500:
+    profit_target_pct: 0.1
+    max_daily_dd_usd: 125.0
+    max_daily_dd_pct: 0.05
+    max_total_dd_pct: 0.1
+    max_total_dd_usd: 250.0
+    trading_days: 60
+    min_trading_days: 5
+  THE_5ERS_100K:
+    profit_target_pct: 0.1
+    max_daily_dd_usd: 125.0
+    max_daily_dd_pct: 0.05
+    max_total_dd_pct: 0.1
+    trading_days: 60
+    min_trading_days: null
+  FTMO_100K:
+    profit_target_pct: 0.1
+    max_daily_dd_usd: 500.0
+    max_daily_dd_pct: 0.05
+    max_total_dd_pct: 0.1
+    trading_days: 30
+    min_trading_days: 10
+  MFF_200K:
+    profit_target_pct: 0.08
+    max_daily_dd_usd: 1000.0
+    max_daily_dd_pct: 0.05
+    max_total_dd_pct: 0.1
+    trading_days: 30
+    min_trading_days: 5

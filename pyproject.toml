@@ -4,23 +4,43 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.11"
 dependencies = [
+    "aiohttp>=3.14.1",
     "arch>=8.0.0",
     "fastapi>=0.136.3",
     "hmmlearn>=0.3.3",
     "httpx>=0.28.1",
     "numpy>=2.4.6",
+    "onnx>=1.21.0",
+    "onnxmltools>=1.16.0",
+    "onnxruntime>=1.26.0",
+    "onnxscript>=0.7.0",
     "pandas>=3.0.3",
+    "polars>=1.41.2",
     "pot>=0.9.6.post1",
     "pydantic>=2.13.4",
     "pytest>=9.0.3",
     "scikit-learn>=1.8.0",
     "scipy>=1.17.1",
+    "skl2onnx>=1.20.0",
     "statsmodels>=0.14.6",
     "torch>=2.12.0",
+    "torchsde>=0.2.6",
     "torchvision>=0.27.0",
     "uvicorn[standard]>=0.48.0",
+    "websockets>=16.0",
+    "xgboost>=3.2.0",
     "yfinance>=1.4.1",
 ]
 
 [tool.pyright]
 extraPaths = ["v3_engine"]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+torchaudio = { index = "pytorch-cpu" }

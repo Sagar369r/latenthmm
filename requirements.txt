@@ -1,0 +1,28 @@
+# Core numerical & ML
+numpy>=1.24,<2.0
+pandas>=2.0,<3.0
+scipy>=1.11,<2.0
+
+# PyTorch (CPU-only version – no CUDA)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.1,<3.0
+torchsde>=0.2.5
+xgboost>=2.0,<3.0
+scikit-learn>=1.3,<2.0
+
+# API & web
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27,<1.0
+pydantic>=2.0,<3.0
+websockets>=12.0,<13.0
+
+# Data loading
+requests>=2.31,<3.0
+
+# Testing & development
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-cov>=4.1
+
+# Optional (visualisation)
+plotly>=5.0metaapi-cloud-sdk>=12.0.0
